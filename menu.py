@@ -24,9 +24,9 @@ def draw_game_start(screen):
 
     #Initialize buttons
     #Initialize text first
-    easy_text = button_font.render("Easy", 0, (255, 255, 255))
-    med_text = button_font.render("Medium", 0, (255, 255, 255))
-    hard_text = button_font.render("Hard", 0, (255, 255, 255))
+    easy_text = button_font.render("EASY", 0, (255, 255, 255))
+    med_text = button_font.render("MEDIUM", 0, (255, 255, 255))
+    hard_text = button_font.render("HARD", 0, (255, 255, 255))
 
     #Initialize button background and text
     easy_surface = pygame.Surface((easy_text.get_size()[0] + 20, easy_text.get_size()[1] + 20))
@@ -78,6 +78,13 @@ def draw_game_over():
     game_over_rectangle = game_over_surf.get_rect(
         center=(WIDTH // 2, HEIGHT // 2 + 100))
     screen.blit(game_over_surf, game_over_rectangle)
+    
+    #Button
+    restart_text = button_font.render("RESTART", 0, (255, 255, 255))
+    
+    restart_surface = pygame.Surface((restart_text.get_size()[0] + 20, restart_text.get_size()[1] + 20))
+    restart_surface.fill(LINE_COLOR)
+    restart_surface.blit(restart_text, (10, 10))
 
 def draw_game_won():
     game_won_font = pygame.font.Font(None, 70)
@@ -87,3 +94,10 @@ def draw_game_won():
     game_won_rectangle = game_won_surf.get_rect(
         center=(WIDTH // 2, HEIGHT // 2 + 100))
     screen.blit(game_won_surf, game_won_rectangle)
+
+    #Button
+    exit_text = button_font.render("EXIT", 0, (255, 255, 255))
+    
+    exit_surface = pygame.Surface((exit_text.get_size()[0] + 20, exit_text.get_size()[1] + 20))
+    exit_surface.fill(LINE_COLOR)
+    exit_surface.blit(exit_text, (10, 10))
