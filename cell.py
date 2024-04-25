@@ -1,6 +1,5 @@
 import pygame
 
-
 class Cell:
     def __init__(self, value, row, col, screen):
         self.value = value
@@ -20,6 +19,9 @@ class Cell:
     def draw(self):
         x = self.col * 50 + 25  # centers of the cells both vertical and horizontal
         y = self.row * 50 + 25
+
+        if self.selected:
+            pygame.draw.rect(self.screen, (0, 255, 0), (x - 25, y - 25, 50, 50), 3)  # Draw a green border around the cell
 
         if self.value != 0:
             number = self.number_font.render(str(self.value), True, (0, 0, 0))
