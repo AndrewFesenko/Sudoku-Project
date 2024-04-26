@@ -7,10 +7,11 @@ WIDTH, HEIGHT = 450, 450
 BG_COLOR = (250, 248, 239)  # Light gray background
 LINE_COLOR = (0, 0, 0)  # Black lines
 
+
 def draw_game_start(screen):
     start_title_font = pygame.font.Font(None, 60)  # Reduced size for better fit
     game_mode_font = pygame.font.Font(None, 40)
-    button_font = pygame.font.Font(None, 50)
+    button_font = pygame.font.Font(None, 30)
 
     screen.fill(BG_COLOR)
     title_surface = start_title_font.render("Welcome to Sudoku", True, LINE_COLOR)
@@ -54,28 +55,53 @@ def draw_game_start(screen):
                     if rect.collidepoint(event.pos):
                         return level  # Return the selected difficulty level
 
+
 def draw_game_won(screen):
-    # Clear the screen or draw a win message over the board
+    win_screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    win_screen.fill(BG_COLOR)
     win_text = "Congratulations! You've won!"
     win_surf = pygame.font.Font(None, 50).render(win_text, True, pygame.Color('green'))
-    screen.blit(win_surf, (50, HEIGHT // 2))  # Adjust position as needed
+    win_rect = win_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    win_screen.blit(win_surf, win_rect)
+    pygame.display.update()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                return  # Return to the caller to handle the next step
+
 
 def draw_game_over(screen):
-    # Clear the screen or draw a game over message over the board
+    over_screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    over_screen.fill(BG_COLOR)
     over_text = "Game Over. Try again!"
     over_surf = pygame.font.Font(None, 50).render(over_text, True, pygame.Color('red'))
-    screen.blit(over_surf, (50, HEIGHT // 2))  # Adjust position as needed
+    over_rect = over_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    over_screen.blit(over_surf, over_rect)
+    pygame.display.update()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type in (pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+                return  # Return to the caller to handle the next step
+
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT + 100))  # Add space for buttons
     pygame.display.set_caption("Sudoku")
-    
+
     difficulty = draw_game_start(screen)  # Get difficulty from the menu
     board = Board(WIDTH, HEIGHT, screen, difficulty.lower())  # Initialize board with selected difficulty
     initial_board = [row[:] for row in board.board]  # Save the initial state of the board
 
-    button_font = pygame.font.Font(None, 40)
+    button_font = pygame.font.Font(None, 30)
     buttons = {
         'reset': {'text': 'Reset', 'rect': pygame.Rect(50, HEIGHT + 20, 100, 50), 'color': LINE_COLOR},
         'restart': {'text': 'Restart', 'rect': pygame.Rect(WIDTH // 2 - 50, HEIGHT + 20, 100, 50), 'color': LINE_COLOR},
@@ -85,7 +111,6 @@ def main():
     def draw_buttons():
         for button_key, button in buttons.items():
             pygame.draw.rect(screen, button['color'], button['rect'])  # Draw button background
-            # Choose a text color that contrasts with the button color
             text_color = (255, 255, 255) if button['color'] == LINE_COLOR else (0, 0, 0)
             text_surf = button_font.render(button['text'], True, text_color)
             text_rect = text_surf.get_rect(center=button['rect'].center)
@@ -105,60 +130,30 @@ def main():
                     return  # Exit the current invocation of main
                 elif buttons['exit']['rect'].collidepoint(pos):
                     running = False
-
                 board.click(pos)  # Handle board click events
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    board.move_selection(0, -1)
-                elif event.key == pygame.K_RIGHT:
-                    board.move_selection(0, 1)
-                elif event.key == pygame.K_UP:
-                    board.move_selection(-1, 0)
-                elif event.key == pygame.K_DOWN:
-                    board.move_selection(1, 0)
-                elif event.key == pygame.K_1:
-                    board.sketch(1)
-                elif event.key == pygame.K_2:
-                    board.sketch(2)
-                elif event.key == pygame.K_3:
-                    board.sketch(3)
-                elif event.key == pygame.K_4:
-                    board.sketch(4)
-                elif event.key == pygame.K_5:
-                    board.sketch(5)
-                elif event.key == pygame.K_6:
-                    board.sketch(6)
-                elif event.key == pygame.K_7:
-                    board.sketch(7)
-                elif event.key == pygame.K_8:
-                    board.sketch(8)
-                elif event.key == pygame.K_9:
-                    board.sketch(9)
+                if event.key in range(pygame.K_1, pygame.K_9 + 1):
+                    board.sketch(event.key - pygame.K_0)
                 elif event.key == pygame.K_RETURN:
                     board.place_number(board.cells[board.selected_cell[0]][board.selected_cell[1]].sketched_value)
                 elif event.key == pygame.K_DELETE:
-                    board.clear()  # This should clear the selected cell
+                    board.clear()  # Clear the selected cell
 
-        # Check for game over or win condition
         if board.is_full():
             if board.check_win():
-                draw_game_won(screen)  # Define this function to show the win screen
-                pygame.display.update()
-                pygame.time.wait(5000)  # Wait for 5 seconds
+                draw_game_won(screen)
                 running = False
             else:
-                draw_game_over(screen)  # Define this function to show the game over screen
-                pygame.display.update()
-                pygame.time.wait(5000)  # Wait for 5 seconds
+                draw_game_over(screen)
                 running = False
-                
-        
+
         screen.fill(BG_COLOR)
         board.draw()
         draw_buttons()
         pygame.display.flip()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
