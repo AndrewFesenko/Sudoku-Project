@@ -7,6 +7,7 @@ WIDTH, HEIGHT = 450, 450
 BG_COLOR = (250, 248, 239)  # Light gray background
 LINE_COLOR = (0, 0, 0)  # Black lines
 
+
 def draw_game_start(screen):
     start_title_font = pygame.font.Font(None, 60)  # Reduced size for better fit
     game_mode_font = pygame.font.Font(None, 40)
@@ -22,10 +23,10 @@ def draw_game_start(screen):
     screen.blit(mode_surface, mode_rectangle)
 
     # Button setup
-    button_width = 100  # Uniform width for all buttons
+    button_width = 138  # Uniform width for all buttons
     button_height = 50  # Uniform height for all buttons
-    button_gap = 30  # Space between buttons
-    total_button_width = 3 * button_width + 2 * button_gap
+    button_gap = 12  # Space between buttons
+    total_button_width = 3 * button_width + 2*button_gap
     start_x = (WIDTH - total_button_width) // 2  # Starting X coordinate to center buttons
 
     buttons = {}
@@ -54,23 +55,78 @@ def draw_game_start(screen):
                     if rect.collidepoint(event.pos):
                         return level  # Return the selected difficulty level
 
-def draw_game_won(screen):
-    # Clear the screen or draw a win message over the board
-    win_text = "Congratulations! You've won!"
-    win_surf = pygame.font.Font(None, 50).render(win_text, True, pygame.Color('green'))
-    screen.blit(win_surf, (50, HEIGHT // 2))  # Adjust position as needed
+
+def draw_game_won(screen, width):
+    pygame.init()
+    # Clear the screen with a background color (e.g., black)
+    screen.fill(BG_COLOR)  # Fill screen with black
+
+    # Define the message and settings
+    win_text = "Congratulations!\n You've won!"
+    font_size = 50
+    font = pygame.font.Font(None, font_size)
+    text_color = pygame.Color('green')
+    lines = win_text.split('\n')
+
+    # Calculate the height to start drawing the text to center it vertically
+    total_height = len(lines) * font_size
+    start_y = (screen.get_height() - total_height) // 2
+
+    # Render each line
+    for i, line in enumerate(lines):
+        # Check the width
+        line_surf = font.render(line, True, text_color)
+        line_width = line_surf.get_width()
+        if line_width > width:
+            # Split the line into words
+            words = line.split()
+            accumulated_line = ""
+            for word in words:
+                # Check width
+                test_line = accumulated_line + word + " "
+                test_surf = font.render(test_line, True, text_color)
+                test_width = test_surf.get_width()
+                if test_width < width:
+                    accumulated_line = test_line
+                else:
+                    # Render the accumulated line
+                    temp_surf = font.render(accumulated_line, True, text_color)
+                    screen.blit(temp_surf, ((width - temp_surf.get_width()) // 2, start_y))
+                    start_y += font_size
+                    accumulated_line = word + " "
+            # Render the last accumulated line
+            temp_surf = font.render(accumilated_line, True, text_color)
+            screen.blit(temp_surf, ((width - temp_surf.get_width()) // 2, start_y))
+            start_y += font_size
+        else:
+            # If the line is within the width, render it directly
+            screen.blit(line_surf, ((width - line_width) // 2, start_y))
+            start_y += font_size
+
+    # Update the display
+    pygame.display.flip()
+
 
 def draw_game_over(screen):
     # Clear the screen or draw a game over message over the board
+    background_color = (BG_COLOR)  # Red, green, blue (RGB)
+
+    # Fill the screen with the background color
+    screen.fill(background_color)
     over_text = "Game Over. Try again!"
     over_surf = pygame.font.Font(None, 50).render(over_text, True, pygame.Color('red'))
     screen.blit(over_surf, (50, HEIGHT // 2))  # Adjust position as needed
+    pygame.display.flip()
+
+    # Update the display to show the new color
+    pygame.display.flip()
+
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT + 100))  # Add space for buttons
     pygame.display.set_caption("Sudoku")
-    
+
     difficulty = draw_game_start(screen)  # Get difficulty from the menu
     board = Board(WIDTH, HEIGHT, screen, difficulty.lower())  # Initialize board with selected difficulty
     initial_board = [row[:] for row in board.board]  # Save the initial state of the board
@@ -142,7 +198,7 @@ def main():
         # Check for game over or win condition
         if board.is_full():
             if board.check_win():
-                draw_game_won(screen)  # Define this function to show the win screen
+                draw_game_won(screen, 450)  # Define this function to show the win screen
                 pygame.display.update()
                 pygame.time.wait(5000)  # Wait for 5 seconds
                 running = False
@@ -151,14 +207,14 @@ def main():
                 pygame.display.update()
                 pygame.time.wait(5000)  # Wait for 5 seconds
                 running = False
-                
-        
+
         screen.fill(BG_COLOR)
         board.draw()
         draw_buttons()
         pygame.display.flip()
 
     pygame.quit()
+
 
 if __name__ == "__main__":
     main()
