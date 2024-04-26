@@ -120,12 +120,17 @@ class SudokuGenerator:
 
 	Return: None
     '''
+
     def fill_box(self, row_start, col_start):
-        num_list = random.sample(range(1, self.row_length + 1), self.row_length)
+        num_list = list(range(1, self.row_length + 1))
+        random.shuffle(num_list)
         for i in range(3):
             for j in range(3):
-                self.board[row_start + i][col_start + j] = num_list.pop()
-    
+                possible_numbers = [num for num in num_list if self.is_valid(row_start + i, col_start + j, num)]
+                if possible_numbers:
+                    num = random.choice(possible_numbers)
+                    self.board[row_start + i][col_start + j] = num
+                    num_list.remove(num)
     '''
     Fills the three boxes along the main diagonal of the board
     These are the boxes which start at (0,0), (3,3), and (6,6)
