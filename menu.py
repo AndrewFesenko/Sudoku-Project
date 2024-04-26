@@ -1,103 +1,93 @@
-#Final Menu Screen
 import sys
-import pygame sys
-from board import Board
+import pygame
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+WIDTH, HEIGHT = 800, 600
+BG_COLOR = (245, 245, 245)  # Light grey background
+LINE_COLOR = (25, 35, 45)  # Dark text color
+BUTTON_COLOR = (15, 165, 145)  # Teal buttons
+BUTTON_HOVER_COLOR = (5, 155, 135)  # Slightly darker teal on hover
+FONT_SIZE_LARGE = 100
+FONT_SIZE_MEDIUM = 85
+FONT_SIZE_SMALL = 70
+
+# Load Fonts
+button_font = pygame.font.Font('Helvetica.ttf', FONT_SIZE_SMALL)  # Example with a custom font
+
+# Set up display
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Sudoku Game')
+
+def vertical_gradient(surface, rect, start_color, end_color):
+    """Draws a vertical gradient filling the entire rect with a start and end color."""
+    height = rect.height
+    start_r, start_g, start_b = start_color
+    end_r, end_g, end_b = end_color
+    for i in range(height):
+        r = start_r + (end_r - start_r) * i / height
+        g = start_g + (end_g - start_g) * i / height
+        b = start_b + (end_b - start_b) * i / height
+        pygame.draw.line(surface, (int(r), int(g), int(b)), (rect.left, rect.top + i), (rect.right, rect.top + i))
+
+def create_button(text, font, center, color=BUTTON_COLOR, padding=20):
+    """Creates a button with text and returns the surface and rect for the button."""
+    text_surface = font.render(text, True, (255, 255, 255))
+    button_surface = pygame.Surface((text_surface.get_width() + padding, text_surface.get_height() + padding)).convert_alpha()
+    button_surface.fill((0, 0, 0, 0))  # Transparent
+
+    rect = pygame.Rect(0, 0, text_surface.get_width() + padding, text_surface.get_height() + padding)
+    vertical_gradient(button_surface, rect, color, (color[0]-30, color[1]-30, color[2]-30))
+
+    button_surface.blit(text_surface, (padding // 2, padding // 2))
+    button_rect = button_surface.get_rect(center=center)
+    return button_surface, button_rect
 
 def draw_game_start(screen):
-    #title font
-    start_title_font = pygame.font.Font(None, 100)
-    game_mode_font = pygame.font.Font(None, 85)
-    button_font = pygame.font.Font(None, 70)
+    """Draws the game start menu and handles button interactions."""
+    start_title_font = pygame.font.Font('Helvetica.ttf', FONT_SIZE_LARGE)
+    game_mode_font = pygame.font.Font('Helvetica.ttf', FONT_SIZE_MEDIUM)
 
-    #Color Background
     screen.fill(BG_COLOR)
 
-    #Inittialize and draw title
-    title_surface = start_title_font.render("Welcome to Sudoku", 0, LINE_COLOR)
-    title_rectangle = title_surface.get_rect(
-        center=(WIDTH // 2, HEIGHT // 2 - 150))
-    screen.blit(title_surface, title_rectangle)
-    mode_surface = game_mode_font.render("Select Game Mode:", 0, LINE_COLOR)
-    mode_rectangle = mode_surface.get_rect(
-        center=(WIDTH // 2, HEIGHT // 2 - 10))
-    screen.blit(mode_surface, mode_rectangle)
+    # Draw Title
+    title_surface = start_title_font.render("Welcome to Sudoku", True, LINE_COLOR)
+    title_rect = title_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 150))
+    screen.blit(title_surface, title_rect)
 
-    #Initialize buttons
-    #Initialize text first
-    easy_text = button_font.render("EASY", 0, (255, 255, 255))
-    med_text = button_font.render("MEDIUM", 0, (255, 255, 255))
-    hard_text = button_font.render("HARD", 0, (255, 255, 255))
+    # Draw Game Mode Text
+    mode_surface = game_mode_font.render("Select Game Mode:", True, LINE_COLOR)
+    mode_rect = mode_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 10))
+    screen.blit(mode_surface, mode_rect)
 
-    #Initialize button background and text
-    easy_surface = pygame.Surface((easy_text.get_size()[0] + 20, easy_text.get_size()[1] + 20))
-    easy_surface.fill(LINE_COLOR)
-    easy_surface.blit(easy_text, (10, 10))
-    med_surface = pygame.Surface((med_text.get_size()[0] + 20, med_text.get_size()[1] + 20))
-    med_surface.fill(LINE_COLOR)
-    med_surface.blit(med_text, (10, 10))
-    hard_surface = pygame.Surface((hard_text.get_size()[0] + 20, hard_text.get_size()[1] + 20))
-    hard_surface.fill(LINE_COLOR)
-    hard_surface.blit(hard_text, (10, 10))
+    # Draw Buttons
+    easy_surface, easy_rect = create_button("EASY", button_font, (WIDTH // 2 - 150, HEIGHT // 2 + 120))
+    med_surface, med_rect = create_button("MEDIUM", button_font, (WIDTH // 2, HEIGHT // 2 + 120))
+    hard_surface, hard_rect = create_button("HARD", button_font, (WIDTH // 2 + 150, HEIGHT // 2 + 120))
 
-    #Initialize button rectangle
-    easy_rectangle = easy_surface.get_rect(
-        center=(WIDTH // 2 - 150, HEIGHT // 2 + 120))
-    med_rectangle = med_surface.get_rect(
-        center=(WIDTH // 2, HEIGHT // 2 + 120))
-    hard_rectangle = hard_surface.get_rect(
-        center=(WIDTH // 2 + 150, HEIGHT // 2 + 120))
+    buttons = [(easy_surface, easy_rect), (med_surface, med_rect), (hard_surface, hard_rect)]
 
-    #Draw buttons
-    screen.blit(easy_surface, easy_rectangle)
-    screen.blit(med_surface, med_rectangle)
-    screen.blit(hard_surface, hard_rectangle)
-
-    while True:
+    running = True
+    while running:
+        mouse_pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                #FIX RETURN FOR THESE THREE IFS
-                if easy_rectangle.collidepoint(event.pos):
-                    #Checks if mouse is on easy button
-                    return # if mouse on easy, we can return to main
-                elif med_rectangle.collidepoint(event.pos):
-                    #Checks if mouse is on easy button
-                    return # if mouse on easy, we can return to main
-                elif hard_rectangle.collidepoint(event.pos):
-                    #Checks if mouse is on easy button
-                    return # if mouse on easy, we can return to main
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for _, rect in buttons:
+                    if rect.collidepoint(event.pos):
+                        return  # Exit the menu on button click
+
+        # Handle button hover effects
+        for surface, rect in buttons:
+            if rect.collidepoint(mouse_pos):
+                inflated_rect = rect.inflate(20, 20)
+                screen.blit(surface, inflated_rect)
+            else:
+                screen.blit(surface, rect)
+
         pygame.display.update()
 
-
-def draw_game_over():
-    game_over_font = pygame.font.Font(None, 70)
-    screen.fill(BG_COLOR)
-
-    game_over_surf = game_over_font.render("Game Over :(", 0, LINE_COLOR)
-    game_over_rectangle = game_over_surf.get_rect(
-        center=(WIDTH // 2, HEIGHT // 2 + 100))
-    screen.blit(game_over_surf, game_over_rectangle)
-    
-    #Button
-    restart_text = button_font.render("RESTART", 0, (255, 255, 255))
-    
-    restart_surface = pygame.Surface((restart_text.get_size()[0] + 20, restart_text.get_size()[1] + 20))
-    restart_surface.fill(LINE_COLOR)
-    restart_surface.blit(restart_text, (10, 10))
-
-def draw_game_won():
-    game_won_font = pygame.font.Font(None, 70)
-    screen.fill(BG_COLOR)
-
-    game_won_surf = game_won_font.render("Game Won!", 0, LINE_COLOR)
-    game_won_rectangle = game_won_surf.get_rect(
-        center=(WIDTH // 2, HEIGHT // 2 + 100))
-    screen.blit(game_won_surf, game_won_rectangle)
-
-    #Button
-    exit_text = button_font.render("EXIT", 0, (255, 255, 255))
-    
-    exit_surface = pygame.Surface((exit_text.get_size()[0] + 20, exit_text.get_size()[1] + 20))
-    exit_surface.fill(LINE_COLOR)
-    exit_surface.blit(exit_text, (10, 10))
+draw_game_start(screen)
