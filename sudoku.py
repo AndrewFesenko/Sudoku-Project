@@ -1,3 +1,4 @@
+#imports (pygame + system library and pull in the board class)
 import pygame
 import sys
 from board import Board
@@ -7,7 +8,7 @@ WIDTH, HEIGHT = 450, 450
 BG_COLOR = (250, 248, 239)  # Light gray background
 LINE_COLOR = (0, 0, 0)  # Black lines
 
-
+#Main menu
 def draw_game_start(screen):
     start_title_font = pygame.font.Font(None, 60)  # Reduced size for better fit
     game_mode_font = pygame.font.Font(None, 40)
@@ -55,7 +56,7 @@ def draw_game_start(screen):
                     if rect.collidepoint(event.pos):
                         return level  # Return the selected difficulty level
 
-
+#The screen that is shown when the user wins the game
 def draw_game_won(screen, width):
     pygame.init()
     # Clear the screen with a background color (e.g., black)
@@ -106,7 +107,7 @@ def draw_game_won(screen, width):
     # Update the display
     pygame.display.flip()
 
-
+#The screen that is shown when the user loses the game
 def draw_game_over(screen):
     # Clear the screen or draw a game over message over the board
     background_color = (BG_COLOR)  # Red, green, blue (RGB)
@@ -121,8 +122,9 @@ def draw_game_over(screen):
     # Update the display to show the new color
     pygame.display.flip()
 
-
+#Main function that has a lot of the logic/game stuff in it. Absolutely essential to the program/game
 def main():
+    #Starts up all the pygame stuff and establishes a window + board + buttons
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT + 100))  # Add space for buttons
     pygame.display.set_caption("Sudoku")
@@ -138,6 +140,7 @@ def main():
         'exit': {'text': 'Exit', 'rect': pygame.Rect(WIDTH - 150, HEIGHT + 20, 100, 50), 'color': LINE_COLOR},
     }
 
+    #Function that draws buttons that are used in the game
     def draw_buttons():
         for button_key, button in buttons.items():
             pygame.draw.rect(screen, button['color'], button['rect'])  # Draw button background
@@ -147,8 +150,10 @@ def main():
             text_rect = text_surf.get_rect(center=button['rect'].center)
             screen.blit(text_surf, text_rect)
 
+    #boolean that determines if the game plays or stops
     running = True
     while running:
+        #A whole bunch of key events that have an action associated with them
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -164,6 +169,7 @@ def main():
 
                 board.click(pos)  # Handle board click events
             elif event.type == pygame.KEYDOWN:
+                #First 4 key events are for arrow keys (and moving the selection square around the screen)
                 if event.key == pygame.K_LEFT:
                     board.move_selection(0, -1)
                 elif event.key == pygame.K_RIGHT:
